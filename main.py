@@ -73,8 +73,8 @@ if __name__ == "__main__":
 
     match = True
 
-    artist_results = searchArtist(driver)
     while match:
+        artist_results = searchArtist(driver)
         print("search results:")
         if artist_results:
             for c in artist_results:
@@ -83,9 +83,15 @@ if __name__ == "__main__":
         else:
             print('no matches, search again')
             match = True
-            searchArtist()
 
-    choice = int(input('which artist? '))
-
-    if isinstance(choice, int) and 0 <= choice <= len(artist_results):
-        print(artist_results[choice])
+    correct = True
+    while correct:
+        try:
+            choice = int(input('which artist? '))
+        except ValueError:
+            print("value is not a number, try again")
+        if 0 <= choice <= len(artist_results):
+            print(artist_results[choice])
+            correct = False
+        else:
+            print("please choose a valid value between the given options: ")
