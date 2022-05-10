@@ -19,6 +19,7 @@ def new_login(driver):
     password = input("Enter your password ")
     driver.get("https://accounts.pixiv.net/login")
     print(driver.title)
+    # values inside sen_keys will be replaced with the suername and password variables
     driver.find_element(By.XPATH, usernameField).send_keys(
         "nur.tahmid2022@gmail.com")
     driver.find_element(By.XPATH, passwordField).send_keys("DianaWgore99")
@@ -88,7 +89,7 @@ if __name__ == "__main__":
     while correct:
         try:
             choice = int(input('which artist? '))
-        except ValueError:
+        except ValueError or IndexError:
             print("value is not a number, try again")
         if 0 <= choice <= len(artist_results):
             print(artist_results[choice])
