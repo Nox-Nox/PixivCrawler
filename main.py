@@ -50,22 +50,18 @@ def searchArtist(driver):
     for artist_selector in artists_selector:
         nick = artist_selector.find('a').get('title')
         link = artist_selector.find('a').get('href')
-        artist = {
-            'id': i,
-            'artist': nick,
-            'link': 'pixiv.net'+link,
-        }
+        artist = {i:
+                  [
+                      nick,
+                      'pixiv.net'+link,
+                  ]
+                  }
         artist_results.append(artist)
         i += 1
     return artist_results
 
 
 if __name__ == "__main__":
-
-    search_bar = '//*[@id="root"]/div[2]/div[1]/div[1]/div[1]/div/div[2]/form/div/input'
-    search_mode_user_click = '//*[@id="root"]/div[2]/div[2]/div/div[5]/nav/a[5]'
-    search_user = 'https://www.pixiv.net/search_user.php?nick={artist_nick}&s_mode=s_usr'
-    artist_nick = str()
 
     s = Service('chromedriver_linux64 (1)/chromedriver')
     driver = webdriver.Chrome(service=s)
@@ -90,3 +86,6 @@ if __name__ == "__main__":
             searchArtist()
 
     choice = int(input('which artist? '))
+
+    if isinstance(choice, int) and 0 <= choice <= len(artist_results):
+        print(artist_results[choice])
