@@ -6,14 +6,15 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service
 from bs4 import BeautifulSoup
+import pickle
 
 
 def login(driver):
     usernameField = '//*[@id="LoginComponent"]/form/div[1]/div[1]/input'
     passwordField = '//*[@id="LoginComponent"]/form/div[1]/div[2]/input'
     login_button = '//*[@id="LoginComponent"]/form/button'
-    username = input("Enter your pixiv ID or E-mail")
-    password = input("Enter your password")
+    username = input("Enter your pixiv ID or E-mail ")
+    password = input("Enter your password ")
     driver.get("https://accounts.pixiv.net/login")
     print(driver.title)
     driver.find_element(By.XPATH, usernameField).send_keys(
@@ -21,6 +22,8 @@ def login(driver):
     driver.find_element(By.XPATH, passwordField).send_keys("DianaWgore99")
     driver.find_element(By.XPATH, login_button).click()
     time.sleep(2)
+    print(driver.get_cookies())
+    pickle.dump(driver.get_cookies(), open("cookies.pkl", "wb"))
 
 
 def search():
@@ -37,7 +40,13 @@ if __name__ == "__main__":
     s = Service('chromedriver_linux64 (1)/chromedriver')
     driver = webdriver.Chrome(service=s)
 
-    login(driver)
+    # login(driver)
+    driver.get("https://pixiv.net")
+    time.sleep(1)
+    cookies = pickle.load(open("cookies.pkl", "rb"))
+    for cookie in cookies:
+        driver.add_cookie(cookie)
+    driver.get("https://pixiv.net")
 
     artist_nick = input('enter artist name: ')
 # driver.find_element_by_xpath(search_bar).send_keys(artist, Keys.ENTER)
