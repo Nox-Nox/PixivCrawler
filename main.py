@@ -54,10 +54,21 @@ for artist_selector in artists_selector:
     artist_results.append(artist)
     i += 1
 
-for c in artist_results:
-    print("search results: ", c)
+match = True
 
-choice = input('which artist? ')
+while match:
+    if artist_results:
+        print("search results:")
+        for c in artist_results:
+            print(c)
+        match = False
+    else:
+        print('no matches, search again')
+        match = True
+    artist_nick = input('enter artist name: ')
+
+
+choice = int(input('which artist? '))
 # try:
 #     WebDriverWait(driver, 40).until(
 #         EC.presence_of_element_located(
