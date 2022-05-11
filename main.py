@@ -32,7 +32,6 @@ def new_login(driver):
 
 def saved_login(driver):
     driver.get("https://pixiv.net")
-    time.sleep(1)
     cookies = pickle.load(open("cookies.pkl", "rb"))
     for cookie in cookies:
         driver.add_cookie(cookie)
@@ -43,7 +42,7 @@ def search_artist_by_name(driver):
     artist_nick = input('enter artist name: ')
     driver.get(
         'https://www.pixiv.net/search_user.php?nick={}&s_mode=s_usr'.format(artist_nick))
-    time.sleep(4)
+    time.sleep(2)
     source = driver.page_source
     soup = BeautifulSoup(source, 'lxml')
     artist_results = []
@@ -68,16 +67,17 @@ def get_art_by_chosen_artist(driver, artist_results, choice):
     time.sleep(2)
     source = driver.page_source
     soup = BeautifulSoup(source, 'lxml')
+    art_pages = soup.find(
+        'nav', class_='sc-xhhh7v-0 kYtoqc')
+    pages = len(art_pages.findAll('a'))-1
+
     art_results = []
     arts_selector = soup.findAll(
         'li', class_='sc-9y4be5-2 sc-9y4be5-3 sc-1wcj34s-1 kFAPOq CgxkO')
-    art_pages = soup.find(
-        'nav', class_='sc-xhhh7v-0 kYtoqc')
+
     i = 0
     title = str()
-    print(len(art_pages.findAll('a'))-1)
-    # for art_page in art_pages.findAll('a'):
-    #     print(art_page.get('href')-1)
+
     for art_selector in arts_selector:
         artist_id = art_selector.find(
             'a', class_='sc-d98f2c-0 sc-rp5asc-16 iUsZyY sc-bdnxRM fGjAxR').get('data-gtm-user-id')
