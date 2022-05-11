@@ -1,7 +1,7 @@
 import time
-import os.path
 from os import path
 from requests import request
+import requests
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
@@ -38,7 +38,47 @@ def saved_login(driver):
     driver.get("https://pixiv.net")
 
 
-def search_artist_by_name(driver):
+def format_link(link):
+    formatted = link.split('/', 3)[-1]
+    return formatted
+
+
+def get_arts_ids(response):
+    ids = []
+    for k, v in response.json().items():
+        if k == 'body' and v['illusts']:
+            i = 1
+            for c, b in v['illusts'].items():
+                ids.append(c)
+
+
+def bulk_query_builder(ids):
+    i = 1
+    j = 1
+    c = 0
+    art_id_query = str()
+    art_id_query_list = []
+    if i < len(ids):
+        for n in ids:
+            # print(i, ' ', j)
+            if j < 50:
+                art_id_query += 'ids%5B%5D={}&'.format(n)
+                j += 1
+                i += 1
+            else:
+                full_query_for_arts = 'https://www.pixiv.net/ajax/user/2188232/profile/illusts?' + \
+                    art_id_query + 'work_category=illustManga&is_first_page=0&lang=en'
+                art_id_query_list.append(full_query_for_arts)
+                art_id_query = ''
+                j = 1
+                i += 1
+        full_query_for_arts = 'https://www.pixiv.net/ajax/user/2188232/profile/illusts?' + \
+            art_id_query + 'work_category=illustManga&is_first_page=0&lang=en'
+        art_id_query_list.append(full_query_for_arts)
+    return art_id_query_list
+
+
+def get_artist_by_name(driver):
     artist_nick = input('enter artist name: ')
     driver.get(
         'https://www.pixiv.net/search_user.php?nick={}&s_mode=s_usr'.format(artist_nick))
@@ -51,10 +91,12 @@ def search_artist_by_name(driver):
     for artist_selector in artists_selector:
         nick = artist_selector.find('a').get('title')
         link = artist_selector.find('a').get('href')
+        id = format_link(link)
         artist = {i:
                   [
                       nick,
                       'https://pixiv.net'+link+'/artworks?p=1',
+                      id,
                   ]
                   }
         artist_results.append(artist)
@@ -62,39 +104,40 @@ def search_artist_by_name(driver):
     return artist_results
 
 
-def get_art_by_chosen_artist(driver, artist_results, choice):
-    driver.get(artist_results[choice][choice][1])
-    time.sleep(2)
-    source = driver.page_source
-    soup = BeautifulSoup(source, 'lxml')
-    art_pages = soup.find(
-        'nav', class_='sc-xhhh7v-0 kYtoqc')
-    pages = len(art_pages.findAll('a'))-1
+def get_arts_ids_by_chosen_artist(driver, artist_results, choice):
+    c = 'https://www.pixiv.net/ajax/user/{}/profile/all?lang=en'.format(
+        artist_results[choice][choice][2])
+    response = requests.get(c)
+    arts_id_list = get_arts_ids(response)
+    bulk_query_builder(arts_id_list)
 
-    art_results = []
-    arts_selector = soup.findAll(
-        'li', class_='sc-9y4be5-2 sc-9y4be5-3 sc-1wcj34s-1 kFAPOq CgxkO')
+    # source = driver.page_source
+    # soup = BeautifulSoup(source, 'lxml')
+    # art_pages = soup.find(
+    #     'nav', class_='sc-xhhh7v-0 kYtoqc')
 
-    i = 0
-    title = str()
-
-    for art_selector in arts_selector:
-        artist_id = art_selector.find(
-            'a', class_='sc-d98f2c-0 sc-rp5asc-16 iUsZyY sc-bdnxRM fGjAxR').get('data-gtm-user-id')
-        link = art_selector.find(
-            'a', class_='sc-d98f2c-0 sc-rp5asc-16 iUsZyY sc-bdnxRM fGjAxR').get('href')
-        for a in art_selector.findAll('a')[1]:
-            title = a.get_text()
-            art = {i:
-                   [
-                       artist_id,
-                       title,
-                       'https://pixiv.net'+link,
-                   ]
-                   }
-            art_results.append(art)
-            i += 1
-    return art_results
+    # art_results = []
+    # arts_selector = soup.findAll(
+    #     'li', class_='sc-9y4be5-2 sc-9y4be5-3 sc-1wcj34s-1 kFAPOq CgxkO')
+    # i = 0
+    # title = str()
+    # for art_selector in arts_selector:
+    #     artist_id = art_selector.find(
+    #         'a', class_='sc-d98f2c-0 sc-rp5asc-16 iUsZyY sc-bdnxRM fGjAxR').get('data-gtm-user-id')
+    #     link = art_selector.find(
+    #         'a', class_='sc-d98f2c-0 sc-rp5asc-16 iUsZyY sc-bdnxRM fGjAxR').get('href')
+    #     for a in art_selector.findAll('a')[1]:
+    #         title = a.get_text()
+    #         art = {i:
+    #                [
+    #                    artist_id,
+    #                    title,
+    #                    'https://pixiv.net'+link,
+    #                ]
+    #                }
+    #         art_results.append(art)
+    #         i += 1
+    # return art_results
 
 
 if __name__ == "__main__":
@@ -109,7 +152,7 @@ if __name__ == "__main__":
 
     match = True
     while match:
-        artist_results = search_artist_by_name(driver)
+        artist_results = get_artist_by_name(driver)
         print("search results:")
         if artist_results:
             for c in artist_results:
@@ -128,7 +171,7 @@ if __name__ == "__main__":
         if 0 <= choice <= len(artist_results):
             print(artist_results[choice][choice][0])
             print(artist_results[choice][choice][1])
-            get_art_by_chosen_artist(driver, artist_results, choice)
+            get_arts_ids_by_chosen_artist(driver, artist_results, choice)
             correct = False
         else:
             print("please choose a valid value between the given options: ")
