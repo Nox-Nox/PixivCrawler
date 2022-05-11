@@ -60,7 +60,6 @@ def bulk_query_builder(ids):
     art_id_query_list = []
     if i < len(ids):
         for n in ids:
-            # print(i, ' ', j)
             if j < 50:
                 art_id_query += 'ids%5B%5D={}&'.format(n)
                 j += 1
@@ -104,7 +103,7 @@ def get_artist_by_name(driver):
     return artist_results
 
 
-def get_arts_ids_by_chosen_artist(driver, artist_results, choice):
+def get_arts_of_chosen_artist(artist_results, choice):
     c = 'https://www.pixiv.net/ajax/user/{}/profile/all?lang=en'.format(
         artist_results[choice][choice][2])
     response = requests.get(c)
@@ -171,7 +170,7 @@ if __name__ == "__main__":
         if 0 <= choice <= len(artist_results):
             print(artist_results[choice][choice][0])
             print(artist_results[choice][choice][1])
-            get_arts_ids_by_chosen_artist(driver, artist_results, choice)
+            get_arts_of_chosen_artist(driver, artist_results, choice)
             correct = False
         else:
             print("please choose a valid value between the given options: ")
