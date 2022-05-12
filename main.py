@@ -1,3 +1,4 @@
+import re
 import time
 from os import path
 from requests import request
@@ -38,9 +39,17 @@ def saved_login(driver):
     driver.get("https://pixiv.net")
 
 
-def format_link(link):
+def format_link_to_get_id(link):
     formatted = link.split('/', 3)[-1]
     return formatted
+
+
+def format_link_to_download(original_link):
+    start_formatted = re.sub('c/.*?250x250_80_a2/img-master',
+                             'img-original', original_link, flags=re.DOTALL)
+    full_formatted = re.sub(
+        '_square1200', '', start_formatted, flags=re.DOTALL)
+    return full_formatted
 
 
 def get_arts_ids(response):
@@ -55,7 +64,6 @@ def get_arts_ids(response):
 def bulk_query_builder(ids):
     i = 1
     j = 1
-    c = 0
     art_id_query = str()
     art_id_query_list = []
     if i < len(ids):
@@ -90,7 +98,7 @@ def get_artist_by_name(driver):
     for artist_selector in artists_selector:
         nick = artist_selector.find('a').get('title')
         link = artist_selector.find('a').get('href')
-        id = format_link(link)
+        id = format_link_to_get_id(link)
         artist = {i:
                   [
                       nick,
@@ -109,34 +117,6 @@ def get_arts_of_chosen_artist(artist_results, choice):
     response = requests.get(c)
     arts_id_list = get_arts_ids(response)
     bulk_query_builder(arts_id_list)
-
-    # source = driver.page_source
-    # soup = BeautifulSoup(source, 'lxml')
-    # art_pages = soup.find(
-    #     'nav', class_='sc-xhhh7v-0 kYtoqc')
-
-    # art_results = []
-    # arts_selector = soup.findAll(
-    #     'li', class_='sc-9y4be5-2 sc-9y4be5-3 sc-1wcj34s-1 kFAPOq CgxkO')
-    # i = 0
-    # title = str()
-    # for art_selector in arts_selector:
-    #     artist_id = art_selector.find(
-    #         'a', class_='sc-d98f2c-0 sc-rp5asc-16 iUsZyY sc-bdnxRM fGjAxR').get('data-gtm-user-id')
-    #     link = art_selector.find(
-    #         'a', class_='sc-d98f2c-0 sc-rp5asc-16 iUsZyY sc-bdnxRM fGjAxR').get('href')
-    #     for a in art_selector.findAll('a')[1]:
-    #         title = a.get_text()
-    #         art = {i:
-    #                [
-    #                    artist_id,
-    #                    title,
-    #                    'https://pixiv.net'+link,
-    #                ]
-    #                }
-    #         art_results.append(art)
-    #         i += 1
-    # return art_results
 
 
 if __name__ == "__main__":
