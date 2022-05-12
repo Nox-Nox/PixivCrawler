@@ -39,6 +39,11 @@ def saved_login(driver):
     driver.get("https://pixiv.net")
 
 
+def display(list):
+    for i in list:
+        print(i)
+
+
 def format_link_to_get_id(link):
     formatted = link.split('/', 3)[-1]
     return formatted
@@ -56,9 +61,9 @@ def get_arts_ids(response):
     ids = []
     for k, v in response.json().items():
         if k == 'body' and v['illusts']:
-            i = 1
             for c, b in v['illusts'].items():
                 ids.append(c)
+    return ids
 
 
 def bulk_query_builder(ids):
@@ -102,7 +107,6 @@ def get_artist_by_name(driver):
         artist = {i:
                   [
                       nick,
-                      'https://pixiv.net'+link+'/artworks?p=1',
                       id,
                   ]
                   }
@@ -116,7 +120,17 @@ def get_arts_of_chosen_artist(artist_results, choice):
         artist_results[choice][choice][2])
     response = requests.get(c)
     arts_id_list = get_arts_ids(response)
-    bulk_query_builder(arts_id_list)
+    art_id_query_list = bulk_query_builder(arts_id_list)
+    illustrations = []
+    i = 0
+    for f in art_id_query_list:
+        data = requests.get(f)
+        for k, v in data.json()['body']['works'].items():
+            illustration = {'id': i, 'art_id': v['id'], 'title': v['title'],
+                            'url': format_link_to_download(v['url'])}
+            i += 1
+            illustrations.append(illustration)
+    return illustrations
 
 
 if __name__ == "__main__":
@@ -134,8 +148,7 @@ if __name__ == "__main__":
         artist_results = get_artist_by_name(driver)
         print("search results:")
         if artist_results:
-            for c in artist_results:
-                print(c)
+            display(artist_results)
             match = False
         else:
             print('no matches, search again')
@@ -150,7 +163,9 @@ if __name__ == "__main__":
         if 0 <= choice <= len(artist_results):
             print(artist_results[choice][choice][0])
             print(artist_results[choice][choice][1])
-            get_arts_of_chosen_artist(driver, artist_results, choice)
+            arts_of_chose_artist = get_arts_of_chosen_artist(
+                artist_results, choice)
+            display(arts_of_chose_artist)
             correct = False
         else:
             print("please choose a valid value between the given options: ")
