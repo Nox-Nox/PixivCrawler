@@ -1,13 +1,11 @@
 import re
 import time
 from os import path
-from requests import request
 import requests
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from bs4 import BeautifulSoup
 import pickle
@@ -32,6 +30,7 @@ def new_login(driver):
 
 
 def saved_login(driver):
+    print('logging in...')
     driver.get("https://pixiv.net")
     cookies = pickle.load(open("cookies.pkl", "rb"))
     for cookie in cookies:
@@ -64,6 +63,20 @@ def get_arts_ids(response):
             for c, b in v['illusts'].items():
                 ids.append(c)
     return ids
+
+
+def choice(subject):
+    choice = int()
+    correct = True
+    while correct:
+        try:
+            choice = int(input('which {}? '.format(subject)))
+        except ValueError or IndexError:
+            print("value is not a number or not between the given range, try again")
+        else:
+            correct = False
+
+    return choice
 
 
 def bulk_query_builder(ids):
@@ -117,7 +130,7 @@ def get_artist_by_name(driver):
 
 def get_arts_of_chosen_artist(artist_results, choice):
     c = 'https://www.pixiv.net/ajax/user/{}/profile/all?lang=en'.format(
-        artist_results[choice][choice][2])
+        artist_results[choice][choice][1])
     response = requests.get(c)
     arts_id_list = get_arts_ids(response)
     art_id_query_list = bulk_query_builder(arts_id_list)
@@ -126,8 +139,18 @@ def get_arts_of_chosen_artist(artist_results, choice):
     for f in art_id_query_list:
         data = requests.get(f)
         for k, v in data.json()['body']['works'].items():
-            illustration = {'id': i, 'art_id': v['id'], 'title': v['title'],
-                            'url': format_link_to_download(v['url'])}
+            art_id = v['id']
+            title = v['title']
+            url = format_link_to_download(v['url'])
+            illustration = {
+                i:
+                [
+                    art_id,
+                    title,
+                    url,
+                ]
+            }
+
             i += 1
             illustrations.append(illustration)
     return illustrations
@@ -136,7 +159,9 @@ def get_arts_of_chosen_artist(artist_results, choice):
 if __name__ == "__main__":
 
     s = Service('chromedriver_linux64 (1)/chromedriver')
-    driver = webdriver.Chrome(service=s)
+    o = Options()
+    o.add_argument('--headless')
+    driver = webdriver.Chrome(service=s, options=o)
 
     if path.exists("cookies.pkl"):
         saved_login(driver)
@@ -156,16 +181,17 @@ if __name__ == "__main__":
 
     correct = True
     while correct:
-        try:
-            choice = int(input('which artist? '))
-        except ValueError or IndexError:
-            print("value is not a number or not between the given range, try again")
-        if 0 <= choice <= len(artist_results):
-            print(artist_results[choice][choice][0])
-            print(artist_results[choice][choice][1])
-            arts_of_chose_artist = get_arts_of_chosen_artist(
-                artist_results, choice)
-            display(arts_of_chose_artist)
+        picked_choice = choice('artist')
+        if 0 <= picked_choice <= len(artist_results):
+            print(artist_results[picked_choice][picked_choice][0],
+                  ' ', artist_results[picked_choice][picked_choice][1])
+            arts_of_chosen_artist = get_arts_of_chosen_artist(
+                artist_results, picked_choice)
+            display(arts_of_chosen_artist)
+            picked_choice = choice('art')
+            if 0 <= picked_choice <= len(arts_of_chosen_artist):
+                print(arts_of_chosen_artist[picked_choice])
+                driver.close()
             correct = False
         else:
             print("please choose a valid value between the given options: ")
