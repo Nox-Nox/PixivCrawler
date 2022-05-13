@@ -70,7 +70,7 @@ def choice(subject):
     correct = True
     while correct:
         try:
-            choice = int(input('which {}? '.format(subject)))
+            choice = int(input('which {}? Choose by number '.format(subject)))
         except ValueError or IndexError:
             print("value is not a number or not between the given range, try again")
         else:
@@ -150,10 +150,36 @@ def get_arts_of_chosen_artist(artist_results, choice):
                     url,
                 ]
             }
-
             i += 1
             illustrations.append(illustration)
     return illustrations
+
+
+def bulk_download(list):
+    try:
+        choice_list = []
+        while True:
+            choice_list.append(
+                int(input("Please select which ilustration you wanna download: ")))
+    except:
+        for i in choice_list:
+            for count, v in enumerate(list):
+                if v[count] == i:
+                    print('v count: ', v[count], 'i: ', i)
+                    img_data = requests.get(
+                        v[count][2], headers={'Referer': 'https://www.pixiv.net/'}, stream=True).content
+                    with open(v[count][1]+'.jpg', 'wb') as f:
+                        f.write(img_data)
+
+
+def all_download(list):
+    for count, i in enumerate(list):
+        print(i[count][2])
+        img_data = requests.get(
+            i[count][2], headers={'Referer': 'https://www.pixiv.net/'}, stream=True).content
+        with open(i[count][1]+'.jpg', 'wb') as f:
+            f.write(img_data)
+            count += 1
 
 
 if __name__ == "__main__":
@@ -179,8 +205,8 @@ if __name__ == "__main__":
             print('no matches, search again')
             match = True
 
-    correct = True
-    while correct:
+    outer_correct = True
+    while outer_correct:
         picked_choice = choice('artist')
         if 0 <= picked_choice <= len(artist_results):
             print(artist_results[picked_choice][picked_choice][0],
@@ -188,10 +214,24 @@ if __name__ == "__main__":
             arts_of_chosen_artist = get_arts_of_chosen_artist(
                 artist_results, picked_choice)
             display(arts_of_chosen_artist)
-            picked_choice = choice('art')
-            if 0 <= picked_choice <= len(arts_of_chosen_artist):
-                print(arts_of_chosen_artist[picked_choice])
-                driver.close()
-            correct = False
+            inner_correct = True
+            while inner_correct:
+                choice_str = input(
+                    'Do you wanna download one/more(m) illustrations or all(a) of them? ')
+                if choice_str == 'm':
+                    bulk_download(arts_of_chosen_artist)
+                    inner_correct = False
+                elif choice_str == 'a':
+                    all_download(arts_of_chosen_artist)
+                    inner_correct = False
+                else:
+                    print(
+                        'Please select a valid option, "m" for one/more illustration, "a" to get all illustrations')
+
+            # picked_choice = choice('art')
+            # if 0 <= picked_choice <= len(arts_of_chosen_artist):
+            #     print(arts_of_chosen_artist[picked_choice][picked_choice][2])
+            #     driver.close()
+            outer_correct = False
         else:
             print("please choose a valid value between the given options: ")
