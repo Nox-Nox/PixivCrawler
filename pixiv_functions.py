@@ -1,4 +1,4 @@
-
+import os
 import requests
 import pickle
 import time
@@ -72,7 +72,6 @@ def choice(subject):
             print("value is not a number or not between the given range, try again")
         else:
             correct = False
-
     return choice
 
 
@@ -137,6 +136,7 @@ def get_arts_of_chosen_artist(artist_results, choice):
         data = requests.get(f)
         for k, v in data.json()['body']['works'].items():
             art_id = v['id']
+            artist_nick = v['userName']
             title = v['title']
             url = format_link_to_download(v['url'])
             illustration = {
@@ -145,6 +145,7 @@ def get_arts_of_chosen_artist(artist_results, choice):
                     art_id,
                     title,
                     url,
+                    artist_nick,
                 ]
             }
             i += 1
@@ -161,17 +162,23 @@ def bulk_download(list):
     except:
         for i in choice_list:
             for k, v in list[i].items():
+                path = v[3]+'/'
                 img_data = requests.get(
                     v[2], headers={'Referer': 'https://www.pixiv.net/'}, stream=True).content
-                with open(v[1]+'.jpg', 'wb') as f:
+                if not os.path.exists(path):
+                    os.makedirs(path)
+                with open(os.path.join(path, v[1]+'.jpg'), 'wb') as f:
                     f.write(img_data)
 
 
 def all_download(list):
     for count, i in enumerate(list):
+        path = i[count][3]+'/'
         print(i[count][2])
         img_data = requests.get(
             i[count][2], headers={'Referer': 'https://www.pixiv.net/'}, stream=True).content
-        with open(i[count][1]+'.jpg', 'wb') as f:
+        if not os.path.exists(path):
+            os.makedirs(path)
+        with open(os.path.join(path, i[count][1]+'.jpg'), 'wb') as f:
             f.write(img_data)
             count += 1
