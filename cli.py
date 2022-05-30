@@ -3,9 +3,18 @@ import requests
 import click
 
 
-def download_all_by_artist_id(user_id):
+@click.group()
+def cli():
+    pass
+
+
+@click.command('all', short_help='to download all illustrations of an artist, type/paste the artist id')
+@click.option('--userid', help="paste user id number found in the url")
+@click.argument('userid')
+def all(userid):
+    print("downloading.....")
     url = 'https://www.pixiv.net/ajax/user/{}/profile/all?lang=en'.format(
-        user_id)
+        userid)
     response = requests.get(url)
     arts_id_list = get_arts_ids(response)
     art_id_query_list = bulk_query_builder(arts_id_list)
@@ -31,9 +40,11 @@ def download_all_by_artist_id(user_id):
             illustrations.append(illustration)
     all_download(illustrations)
 
-@click.command()
-@click.option('--artid')
-def download_art_by_id(artid):
+
+@click.command('single', short_help='to download a single illustration, type/paste the artwork id')
+@click.option('--artid', help="paste the id of the art found in the url")
+@click.argument('artid')
+def single(artid):
     print("downloading...")
     url = single_query_builder(artid)
     path = 'illustrations/'
@@ -44,7 +55,10 @@ def download_art_by_id(artid):
         f.write(img_data)
 
 
-if __name__=='__main__':
-    download_art_by_id()
+cli.add_command(all)
+cli.add_command(single)
 
+
+if __name__=='__main__':
+    cli()
 
