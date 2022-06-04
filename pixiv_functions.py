@@ -8,22 +8,20 @@ import time
 import re
 
 
-
-
 def new_login(driver):
     usernameField = 'form.sc-y2pfnd-2.cLXqZh  fieldset.sc-bn9ph6-0.kJkgq.sc-y2pfnd-5.hwSAwj label.sc-bn9ph6-1.hJBrSP input.sc-bn9ph6-6.degQSE'
     passwordField = 'form.sc-y2pfnd-2.cLXqZh  fieldset.sc-bn9ph6-0.kJkgq.sc-y2pfnd-6.ioPdtV label.sc-bn9ph6-1.hJBrSP input.sc-bn9ph6-6.hfoSmp'
     login_button = 'form.sc-y2pfnd-2.cLXqZh button.sc-bdnxRM.jvCTkj.sc-dlnjwi.pKCsX.sc-y2pfnd-9.dMhwJU.sc-y2pfnd-9.dMhwJU'
-    username = input("Enter your pixiv ID or E-mail ")
-    password = input("Enter your password ")
+    username = input("Enter your pixiv ID or E-mail: ")
+    password = input("Enter your password: ")
     driver.get("https://accounts.pixiv.net/login")
     print(driver.title)
     # values inside send_keys will be replaced with the suername and password variables
     driver.find_element(By.CSS_SELECTOR, usernameField).send_keys(
-        "nur.tahmid2022@gmail.com")
-    driver.find_element(By.CSS_SELECTOR, passwordField).send_keys("DianaWgore99")
+        username)
+    driver.find_element(By.CSS_SELECTOR, passwordField).send_keys(password)
     driver.find_element(By.CSS_SELECTOR, login_button).click()
-    time.sleep(2)
+    time.sleep(1)
     pickle.dump(driver.get_cookies(), open("cookies.pkl", "wb"))
 
 
@@ -101,8 +99,7 @@ def bulk_query_builder(ids):
 
 def single_query_builder(id):
     # art_id = id      this link is used to get metadata
-    # query = 'https://www.pixiv.net/ajax/user/2188232/profile/illusts?' + \  
-    #                 id + 'work_category=illustManga&is_first_page=0&lang=en'
+    # query = 'https://www.pixiv.net/ajax/user/2188232/profile/illusts?' +  id + 'work_category=illustManga&is_first_page=0&lang=en'
     url = 'https://i.pximg.net/img-master/img/2022/03/08/00/00/56/{}_p1_master1200.jpg'.format(id)
     return url
 
@@ -192,42 +189,4 @@ def all_download(list):
             f.write(img_data)
             count += 1
 
-
-# def download_all_by_artist_id(user_id):
-#     url = 'https://www.pixiv.net/ajax/user/{}/profile/all?lang=en'.format(
-#         user_id)
-#     response = requests.get(url)
-#     arts_id_list = get_arts_ids(response)
-#     art_id_query_list = bulk_query_builder(arts_id_list)
-#     illustrations = []
-#     i = 0
-#     for f in art_id_query_list:
-#         data = requests.get(f)
-#         for k, v in data.json()['body']['works'].items():
-#             art_id = v['id']
-#             artist_nick = v['userName']
-#             title = v['title']
-#             url = format_link_to_download(v['url'])
-#             illustration = {
-#                 i:
-#                 [
-#                     art_id,
-#                     title,
-#                     url,
-#                     artist_nick,
-#                 ]
-#             }
-#             i += 1
-#             illustrations.append(illustration)
-#     all_download(illustrations)
-
-
-# def download_art_by_id(art_id):
-#     url = single_query_builder(art_id)
-#     path = 'illustrations/'
-#     img_data = requests.get(url, headers={'Referer': 'https://www.pixiv.net/'}, stream=True).content
-#     if not os.path.exists(path):
-#         os.makedirs(path)
-#     with open(os.path.join(path, 'illustration.jpg'), 'wb') as f:
-#         f.write(img_data)
 
