@@ -1,6 +1,8 @@
 ## PixivCrawler
 
 The obective of this project is to learn how to create a script which does automation and create a cli with the click library.
+
+
 main.py is the automation script which will do:
 
 - the login of the Pixiv website
