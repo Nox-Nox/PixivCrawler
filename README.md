@@ -13,3 +13,13 @@ main.py is the automation script which will do:
 The cli have 2 commands:
 - download all illustrations of an artist by giving the artist id which can be found in the URL
 - download a single illustration by giving the illustration id found in the URL
+
+
+libraries used are:
+- selenium with chrome webdriver
+- beautiful soup
+- click
+- requests
+- pickle
+- os
+
