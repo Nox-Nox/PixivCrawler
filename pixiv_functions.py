@@ -219,4 +219,19 @@ def all_download(userid):
 
 
 def single_download(artid):
-    pass
+    print("downloading...")
+    metadata_url = 'https://www.pixiv.net/ajax/user/18096447/profile/illusts?ids%5B%5D={}&work_category=illustManga&is_first_page=0&lang=en'.format(
+        artid)
+    data = requests.get(metadata_url)
+    json_data = data.json()['body']['works'][artid]
+    art_id = json_data['id']
+    artist_nick = json_data['userName']
+    title = json_data['title']
+    url = format_link_to_download(json_data['url'])
+    path = 'illustrations/'+artist_nick
+    img_data = requests.get(
+        url, headers={'Referer': 'https://www.pixiv.net/'}, stream=True).content
+    if not os.path.exists(path):
+        os.makedirs(path)
+    with open(os.path.join(path, title+'.jpg'), 'wb') as f:
+        f.write(img_data)
