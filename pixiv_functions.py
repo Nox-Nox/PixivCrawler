@@ -131,9 +131,10 @@ def get_artist_by_name(driver):
     return artist_results
 
 
-def get_arts_of_chosen_artist(artist_results, choice, artistid):
+def get_arts_of_chosen_artist(artist_results, choice):
     url = 'https://www.pixiv.net/ajax/user/{}/profile/all?lang=en'.format(
         artist_results[choice][choice][1])
+    artistid = artist_results[choice][choice][1]
     response = requests.get(url)
     arts_id_list = get_arts_ids(response)
     art_id_query_list = bulk_query_builder(arts_id_list, artistid)
