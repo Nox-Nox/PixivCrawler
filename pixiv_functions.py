@@ -78,6 +78,7 @@ def bulk_query_builder(ids, artistid):
     j = 1
     art_id_query = str()
     art_id_query_list = []
+    #built the function like this because pixiv doesnt take more than 50 ids
     if i < len(ids):
         for n in ids:
             if j < 50:
@@ -87,7 +88,6 @@ def bulk_query_builder(ids, artistid):
             else:
                 full_query_for_arts = 'https://www.pixiv.net/ajax/user/{}/profile/illusts?'.format(
                     artistid) + art_id_query + 'work_category=illustManga&is_first_page=0&lang=en'
-
                 art_id_query_list.append(full_query_for_arts)
                 art_id_query = ''
                 j = 1
@@ -98,12 +98,12 @@ def bulk_query_builder(ids, artistid):
     return art_id_query_list
 
 
-def single_query_builder(id):
-    # art_id = id      this link is used to get metadata
-    # query = 'https://www.pixiv.net/ajax/user/2188232/profile/illusts?' +  id + 'work_category=illustManga&is_first_page=0&lang=en'
-    url = 'https://i.pximg.net/img-master/img/2022/03/08/00/00/56/{}_p1_master1200.jpg'.format(
-        id)
-    return url
+# def single_query_builder(id):
+#     # art_id = id      this link is used to get metadata
+#     # query = 'https://www.pixiv.net/ajax/user/2188232/profile/illusts?' +  id + 'work_category=illustManga&is_first_page=0&lang=en'
+#     url = 'https://i.pximg.net/img-master/img/2022/03/08/00/00/56/{}_p1_master1200.jpg'.format(
+#         id)
+#     return url
 
 
 def get_artist_by_name(driver):
@@ -179,8 +179,34 @@ def bulk_download(list):
                     f.write(img_data)
 
 
-def all_download(list):
-    for count, i in enumerate(list):
+def all_download(userid):
+    print("downloading.....")
+    url = 'https://www.pixiv.net/ajax/user/{}/profile/all?lang=en'.format(
+        userid)
+    response = requests.get(url)
+    arts_id_list = get_arts_ids(response)
+    art_id_query_list = bulk_query_builder(arts_id_list, userid)
+    illustrations = []
+    i = 0
+    for f in art_id_query_list:
+        data = requests.get(f)
+        for k, v in data.json()['body']['works'].items():
+            art_id = v['id']
+            artist_nick = v['userName']
+            title = v['title']
+            url = format_link_to_download(v['url'])
+            illustration = {
+                i:
+                [
+                    art_id,
+                    title,
+                    url,
+                    artist_nick,
+                ]
+            }
+            i += 1
+            illustrations.append(illustration)
+    for count, i in enumerate(illustrations):
         path = i[count][3]+'/'
         print(i[count][2])
         img_data = requests.get(
@@ -190,3 +216,7 @@ def all_download(list):
         with open(os.path.join(path, i[count][1]+'.jpg'), 'wb') as f:
             f.write(img_data)
             count += 1
+
+
+def single_download(artid):
+    pass
