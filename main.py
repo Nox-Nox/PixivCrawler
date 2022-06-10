@@ -34,7 +34,8 @@ if __name__ == "__main__":
         if 0 <= picked_choice <= len(artist_results):
             print(artist_results[picked_choice][picked_choice][0],
                   ' ', artist_results[picked_choice][picked_choice][1])
-            arts_of_chosen_artist = get_arts_of_chosen_artist(artist_results, picked_choice)
+            arts_of_chosen_artist = get_arts_of_chosen_artist(
+                artist_results, picked_choice)
             display(arts_of_chosen_artist)
             inner_correct = True
             while inner_correct:

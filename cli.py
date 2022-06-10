@@ -23,6 +23,5 @@ cli.add_command(all)
 cli.add_command(single)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     cli()
-
