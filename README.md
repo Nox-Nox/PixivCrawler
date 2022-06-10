@@ -25,4 +25,4 @@ libraries used are:
 - pickle
 - os
 
-### developement is still in progress, need to make small changes.
+### may add some more functions in the future.
