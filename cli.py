@@ -1,5 +1,4 @@
-from pixiv_functions import*
-import requests
+from pixiv_functions import single_download, all_download
 import click
 
 
