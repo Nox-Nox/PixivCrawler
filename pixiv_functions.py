@@ -15,7 +15,6 @@ def new_login(driver):
     username = input("Enter your pixiv ID or E-mail: ")
     password = input("Enter your password: ")
     driver.get("https://accounts.pixiv.net/login")
-    # values inside send_keys will be replaced with the suername and password variables
     driver.find_element(By.CSS_SELECTOR, usernameField).send_keys(
         username)
     driver.find_element(By.CSS_SELECTOR, passwordField).send_keys(password)
@@ -78,7 +77,7 @@ def bulk_query_builder(ids, artistid):
     j = 1
     art_id_query = str()
     art_id_query_list = []
-    #built the function like this because pixiv doesnt take more than 50 ids
+    # built the function like this because pixiv doesnt take more than 50 ids
     if i < len(ids):
         for n in ids:
             if j < 50:
